@@ -82,6 +82,23 @@
                     </webResources>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>com.google.appengine</groupId>
+                <artifactId>appengine-maven-plugin</artifactId>
+                <version>${appengine.target.version}</version>
+                <configuration>
+                    <port>8080</port>
+                    <enableJarClasses>false</enableJarClasses>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>endpoints_get_discovery_doc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

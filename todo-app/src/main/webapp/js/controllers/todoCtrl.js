@@ -6,20 +6,42 @@
  * - retrieves and persists the model via the todoStorage service
  * - exposes the model to the template and provides event handlers
  */
-todomvc.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, todoStorage, filterFilter) {
-	var todos = $scope.todos = todoStorage.get();
+todomvc.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, $window, todoStorage, filterFilter) {
+    $scope.todos = [];
 
 	$scope.newTodo = '';
 	$scope.editedTodo = null;
 
-	$scope.$watch('todos', function (newValue, oldValue) {
-		$scope.remainingCount = filterFilter(todos, { completed: false }).length;
-		$scope.completedCount = todos.length - $scope.remainingCount;
-		$scope.allChecked = !$scope.remainingCount;
-		if (newValue !== oldValue) { // This prevents unneeded calls to the local storage
-			todoStorage.put(todos);
-		}
-	}, true);
+    // ajout pour gae >>
+    /**
+     * fonction interceptant l'appel à window.init() effectué dans index.html
+     */
+    $window.init= function() {
+        console.log("$window.init called");
+        $scope.$apply($scope.load_gapi_todo_lib);
+    };
+
+
+    $scope.load_gapi_todo_lib = function() {
+        console.log("load_todo_lib called");
+        var ROOT = 'http://localhost:9090/_ah/api';
+        gapi.client.load('todo', 'v1', function() {
+            console.log("todo api loaded");
+            $scope.getTodos();
+        }, ROOT);
+
+    };
+
+
+    $scope.getTodos = function() {
+        todoStorage.list(function(resp) {
+            console.log(resp);
+            $scope.todos = resp.items;
+            $scope.$apply();
+        });
+    }
+    // << fin ajout pour gae
+
 
 	// Monitor the current route for changes and adjust the filter accordingly.
 	$scope.$on('$routeChangeSuccess', function () {
@@ -31,15 +53,24 @@ todomvc.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, todoStora
 	});
 
 	$scope.addTodo = function () {
-		var newTodo = $scope.newTodo.trim();
-		if (!newTodo.length) {
+		var newTodoTile = $scope.newTodo.trim();
+		if (!newTodoTile.length) {
 			return;
 		}
 
-		todos.push({
-			title: newTodo,
-			completed: false
-		});
+        var newTodo = {
+            title: newTodoTile,
+            completed: false
+        };
+
+        todoStorage.create(newTodo, function(todoResp) {
+            $scope.todos.push({
+                id: todoResp.id,
+                title: todoResp.title,
+                completed: todoResp.completed
+            });
+            $scope.$apply();
+        });
 
 		$scope.newTodo = '';
 	};
@@ -56,26 +87,33 @@ todomvc.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, todoStora
 
 		if (!todo.title) {
 			$scope.removeTodo(todo);
-		}
+		} else {
+            todoStorage.update(todo, function(todo) {
+                console.log('todo with id ' + todo.result.id + ' successfully updated');
+            });
+        }
 	};
 
 	$scope.revertEditing = function (todo) {
-		todos[todos.indexOf(todo)] = $scope.originalTodo;
-		$scope.doneEditing($scope.originalTodo);
+		$scope.todos[$scope.todos.indexOf(todo)] = $scope.originalTodo;
+        $scope.editedTodo = null;
 	};
 
 	$scope.removeTodo = function (todo) {
-		todos.splice(todos.indexOf(todo), 1);
+		$scope.todos.splice($scope.todos.indexOf(todo), 1);
+        todoStorage.remove(todo, function() {
+            $scope.$apply();
+        })
 	};
 
 	$scope.clearCompletedTodos = function () {
-		$scope.todos = todos = todos.filter(function (val) {
+		$scope.todos = scope.todos.filter(function (val) {
 			return !val.completed;
 		});
 	};
 
 	$scope.markAll = function (completed) {
-		todos.forEach(function (todo) {
+		$scope.todos.forEach(function (todo) {
 			todo.completed = !completed;
 		});
 	};
