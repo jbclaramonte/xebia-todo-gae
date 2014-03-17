@@ -14,6 +14,8 @@ public class HelloServlet extends HttpServlet {
         out.println("<html>");
         out.println("<body>");
         out.println("<h1>Hello Servlet Get sample</h1>");
+        out.println("serverName" + request.getServerName());
+        out.println("serverPort" + request.getServerPort());
         out.println("</body>");
         out.println("</html>");
     }

@@ -1,4 +1,4 @@
-package fr.xebia.gae.todo.model;
+package fr.xebia.gae.todo.api.model;
 
 
 import com.googlecode.objectify.annotation.Entity;
@@ -17,7 +17,7 @@ public class Todo {
     private Date lastEdit;
 
     @Index
-    private Long userId;
+    private String userId;
 
     public Todo() {
     }
@@ -57,11 +57,11 @@ public class Todo {
         this.completed = completed;
     }
 
-    public Long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 

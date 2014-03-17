@@ -23,10 +23,15 @@
     </properties>
 
     <dependencies>
+        <!--<dependency>-->
+            <!--<groupId>fr.xebia.gae.todo</groupId>-->
+            <!--<artifactId>todo-model</artifactId>-->
+            <!--<version>1.0-SNAPSHOT</version>-->
+        <!--</dependency>-->
         <dependency>
-            <groupId>fr.xebia.gae.todo</groupId>
-            <artifactId>todo-model</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>com.googlecode.objectify</groupId>
+            <artifactId>objectify</artifactId>
+            <version>4.0b3</version>
         </dependency>
 
         <!-- Compile/runtime dependencies -->
@@ -106,6 +111,11 @@
                 <configuration>
                     <port>9090</port>
                     <enableJarClasses>false</enableJarClasses>
+                    <jvmFlags>
+                        <jvmFlag>-Ddatastore.default_high_rep_job_policy_unapplied_job_pct=0</jvmFlag>
+                        <jvmFlag>-Xdebug</jvmFlag>
+                        <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n</jvmFlag>
+                    </jvmFlags>
                 </configuration>
                 <executions>
                     <execution>

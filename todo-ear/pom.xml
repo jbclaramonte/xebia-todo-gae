@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>fr.xebia.gae.yawyl</groupId>
+    <groupId>fr.xebia.gae.todo</groupId>
     <artifactId>todo-gae</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>ear</packaging>

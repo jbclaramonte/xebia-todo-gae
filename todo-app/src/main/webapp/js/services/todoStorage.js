@@ -26,6 +26,11 @@ todomvc.factory('todoStorage', function () {
         remove: function (todo, callback) {
             console.log("remove todo:" + todo);
             gapi.client.todo.remove(todo).execute(callback);
+        },
+
+        currentUser: function(callback) {
+            console.log("getting user info");
+            gapi.client.todo.currentuser().execute(callback);
         }
 	};
 });

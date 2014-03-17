@@ -12,6 +12,11 @@ todomvc.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, $window, 
 	$scope.newTodo = '';
 	$scope.editedTodo = null;
 
+    $scope.authenticated = false;
+    $scope.userEmail = '';
+
+    var client_id = '569801581438.apps.googleusercontent.com';
+
     // ajout pour gae >>
     /**
      * fonction interceptant l'appel à window.init() effectué dans index.html
@@ -21,22 +26,61 @@ todomvc.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, $window, 
         $scope.$apply($scope.load_gapi_todo_lib);
     };
 
-
-    $scope.load_gapi_todo_lib = function() {
-        console.log("load_todo_lib called");
-        var ROOT = 'http://localhost:9090/_ah/api';
-        gapi.client.load('todo', 'v1', function() {
-            console.log("todo api loaded");
+    var authenticationCallback = function(authResult) {
+        if (authResult) {
+            console.log("todo api already authenticated");
+            $scope.authenticated = true;
+            $scope.userEmail = "someone@gmail.com";
+            todoStorage.currentUser(function(user) {
+                $scope.userEmail = user.email;
+            });
             $scope.getTodos();
-        }, ROOT);
-
+        } else {
+            console.log("todo api not authenticated");
+            $scope.authenticated = false;
+        }
     };
 
+    $scope.load_gapi_todo_lib = function() {
+
+        console.log("load_todo_lib called");
+
+        var rootApi = 'https://todo-api-dot-xebia-todo.appspot.com/_ah/api';
+
+        if ($window.location.host.indexOf("localhost") !=-1) {
+            rootApi = 'http://localhost:9090/_ah/api';
+            client_id = '569801581438-rttjqtltiuhijbcrn7h3sg757j31r6rh.apps.googleusercontent.com';
+        }
+        console.log("rootApi=" + rootApi);
+        gapi.client.load('todo', 'v2', function() {
+            console.log("todo api loaded");
+
+            gapi.client.load('oauth2', 'v2', function() {
+                console.log("oauth2 api loaded");
+
+                gapi.auth.authorize({
+                        client_id: client_id,
+                        scope: 'https://www.googleapis.com/auth/userinfo.email',
+                        immediate: true
+                    }, authenticationCallback);
+            });
+        }, rootApi);
+    };
+
+    $scope.authenticate = function() {
+        gapi.auth.authorize({
+                client_id: client_id,
+                scope: 'https://www.googleapis.com/auth/userinfo.email',
+                immediate: false
+            },authenticationCallback);
+    }
 
     $scope.getTodos = function() {
         todoStorage.list(function(resp) {
             console.log(resp);
-            $scope.todos = resp.items;
+            if (resp.items != undefined) {
+                $scope.todos = resp.items;
+            }
             $scope.$apply();
         });
     }

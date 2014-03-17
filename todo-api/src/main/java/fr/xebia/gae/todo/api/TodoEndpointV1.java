@@ -3,7 +3,7 @@ package fr.xebia.gae.todo.api;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
-import fr.xebia.gae.todo.model.Todo;
+import fr.xebia.gae.todo.api.model.Todo;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,12 +19,12 @@ public class TodoEndpointV1 {
 
     private static Logger logger = Logger.getLogger(TodoEndpointV1.class.getName());
 
-    private static Map<String, Todo> todos = new HashMap<>();
+    private static Map<Long, Todo> todos = new HashMap<>();
 
     static {
-        Todo todo = new Todo("1", "test 1", false);
+        Todo todo = new Todo(new Long(1), "test 1", false);
         todos.put(todo.getId(), todo);
-        todo = new Todo("2", "test 2", true);
+        todo = new Todo(new Long(2), "test 2", true);
         todos.put(todo.getId(), todo);
     }
 
@@ -38,7 +38,7 @@ public class TodoEndpointV1 {
     public Todo create(Todo todo) {
         logger.info("creating todo : " + todo.toString());
 
-        todo.setId(UUID.randomUUID().toString());
+        todo.setId(UUID.randomUUID().timestamp());
 
         todos.put(todo.getId(), todo);
 
